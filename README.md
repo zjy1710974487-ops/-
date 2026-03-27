@@ -1,131 +1,563 @@
 EMRI LISA SNR Analysis Pipeline
-First-Order Phase-Transition Effects in Kerr EMRIs
+Figure-Oriented Implementation and Signal Comparison
+Overview
 
-Scientific Context
+This repository implements a numerical pipeline whose primary goal is to generate and compare figures.
 
-This repository implements a computational pipeline corresponding to the analysis presented in the paper “Detectability and Systematic Bias from First-Order Phase-Transition Dephasing in Kerr EMRIs”. The project focuses on modeling gravitational wave signals from extreme mass-ratio inspirals (EMRIs) and studying the impact of a first-order phase transition in the dissipative flux sector.
+The code constructs two signals:
 
-Core Physical Idea
+ℎ
+𝐵
+(
+𝑡
+)
+,
+ℎ
+𝑇
+(
+𝑡
+)
+h
+B
+	​
 
-A localized modification in the inspiral flux produces a non-trivial observational regime characterized by small mismatch, order-unity residual, and large accumulated phase drift.
+(t),h
+T
+	​
 
-M << 1, ρ_R ~ 1, ΔΦ >> 1
+(t)
 
-The purpose of this repository is to numerically reconstruct and demonstrate this regime.
+and focuses on visualizing their difference through multiple plots.
 
-Repository Structure
+All computations are organized around answering one question:
 
-The project consists of three main notebooks and supporting scripts.
-EMRI_LISA_SNR_paper_pipeline.ipynb contains the full analysis pipeline.
-research_notebook.ipynb focuses on exploratory analysis and visualization.
-Untitled30.ipynb is used for auxiliary testing.
-PostProcessingScripts.py provides reusable functions.
+How does a small modification in the evolution change the observable signal?
+How does a small modification in the evolution change the observable signal?
+What the Code Actually Computes
 
-Workflow Overview
-Inspiral Dynamics
+The pipeline performs the following steps:
 
-The inspiral evolution is governed by the energy balance equation:
+Construct phase evolution 
+Φ
+(
+𝑡
+)
+Φ(t)
+Build waveform
+ℎ
+(
+𝑡
+)
+=
+𝐴
+(
+𝑡
+)
+cos
+⁡
+(
+Φ
+(
+𝑡
+)
+)
+h(t)=A(t)cos(Φ(t))
+Generate two versions:
+baseline signal 
+ℎ
+𝐵
+(
+𝑡
+)
+h
+B
+	​
 
-dE/dt = -F(v, a)
+(t)
+modified signal 
+ℎ
+𝑇
+(
+𝑡
+)
+h
+T
+	​
 
-The inspiral clock is computed as:
+(t)
+Compute residual
+ℎ
+𝑅
+(
+𝑡
+)
+=
+ℎ
+𝐵
+(
+𝑡
+)
+−
+ℎ
+𝑇
+(
+𝑡
+)
+h
+R
+	​
 
-dt/dv = -μ (dE/dv) / F(v, a)
+(t)=h
+B
+	​
 
-Two branches are constructed:
-Baseline flux F_B(v)
-Transition-modified flux F_T(v)
+(t)−h
+T
+	​
 
-Transition Sector
+(t)
+Transform signals to frequency domain
+Produce plots comparing all three
+Figures and Their Code Logic
+1. Time-Domain Waveform Plot
 
-The phase transition is modeled as a smooth modification:
+Code operation
 
-Λ(v) = Λ_H + (Λ_Q - Λ_H) S(x)
+Compute 
+ℎ
+𝐵
+(
+𝑡
+)
+h
+B
+	​
 
-The modified flux is:
+(t) and 
+ℎ
+𝑇
+(
+𝑡
+)
+h
+T
+	​
 
-F_T(v) = F_B(v) * [1 + Λ(v) H_PT(v)]
+(t) from the same amplitude
+Only phase evolution differs
+Subtract to obtain residual
+ℎ
+𝑅
+(
+𝑡
+)
+=
+ℎ
+𝐵
+(
+𝑡
+)
+−
+ℎ
+𝑇
+(
+𝑡
+)
+h
+R
+	​
 
-Phase Evolution
+(t)=h
+B
+	​
 
-dΦ/dt = 2Ω(v)
+(t)−h
+T
+	​
 
-dΦ/dv = 2Ω(v) * dt/dv
+(t)
 
-ΔΦ = Φ_B - Φ_T
+What appears in the plot
 
-Benchmark result:
+Two almost overlapping oscillatory curves
+A third curve (residual) with growing structure
 
-ΔΦ ~ 5 × 10^3 rad
+What this means (from code perspective)
 
-Time-Domain Waveform
+Since amplitude is almost unchanged,
+the difference is driven entirely by phase
+The longer the evolution,
+the larger the misalignment becomes
+2. Residual Evolution Plot
 
-h(t) = A(t) cos(Φ(t))
+Code operation
 
-Baseline waveform: h_B(t)
-Transition waveform: h_T(t)
-Residual:
+Directly plots 
+ℎ
+𝑅
+(
+𝑡
+)
+h
+R
+	​
 
-h_R(t) = h_B(t) - h_T(t)
+(t)
 
-Frequency-Domain Analysis
+What appears
 
-h̃(f) = ∫ h(t) e^{-2πift} dt
+Oscillatory residual
+Increasing envelope toward the end
 
-Characteristic strain:
+What this means
 
-h_c(f) = 2f |h̃(f)|
+ℎ
+𝑅
+(
+𝑡
+)
+≈
+2
+𝐴
+(
+𝑡
+)
+sin
+⁡
+(
+Δ
+Φ
+2
+)
+h
+R
+	​
 
-Noise scale:
+(t)≈2A(t)sin(
+2
+ΔΦ
+	​
 
-h_n(f) = sqrt(f S_n(f))
+)
+Residual grows as phase difference accumulates
+Not noise — fully deterministic from code
+3. Frequency-Domain Spectrum
 
-Detector Inner Product
+Code operation
 
-(h1|h2) = 4 ∫ (h̃1 h̃2*) / S_n(f) df
+Apply FFT:
 
-Key Metrics
+ℎ
+(
+𝑡
+)
+→
+ℎ
+~
+(
+𝑓
+)
+h(t)→
+h
+~
+(f)
+
+Then compute magnitude
+
+What appears
+
+Baseline and modified spectra almost overlap
+Residual spectrum localized
+
+What this means
+
+Code shows that global frequency content is preserved
+Differences are subtle and structured
+4. Characteristic Strain Plot
+
+Code operation
+
+ℎ
+𝑐
+(
+𝑓
+)
+=
+2
+𝑓
+∣
+ℎ
+~
+(
+𝑓
+)
+∣
+h
+c
+	​
+
+(f)=2f∣
+h
+~
+(f)∣
+
+What appears
+
+Two main curves nearly identical
+Residual curve significantly lower
+
+What this means
+
+Modification does not strongly change signal strength
+Confirms difference is not amplitude-driven
+5. Signal vs Detector Noise
+
+Code operation
+
+ℎ
+𝑛
+(
+𝑓
+)
+=
+𝑓
+𝑆
+𝑛
+(
+𝑓
+)
+h
+n
+	​
+
+(f)=
+fS
+n
+	​
+
+(f)
+	​
+
+
+Plot 
+ℎ
+𝑐
+(
+𝑓
+)
+h
+c
+	​
+
+(f) together with 
+ℎ
+𝑛
+(
+𝑓
+)
+h
+n
+	​
+
+(f)
+
+What appears
+
+Signal intersects detector sensitivity band
+Both signals detectable
+
+What this means
+
+Code verifies detectability condition
+Modification does not push signal below noise
+6. Numerical Comparison (No Plot but Derived from Data)
+
+Code computes
 
 Signal-to-noise ratio:
 
-ρ = sqrt((h|h))
+𝜌
+=
+(
+ℎ
+∣
+ℎ
+)
+ρ=
+(h∣h)
+	​
 
-Benchmark:
 
-ρ_B ≈ 5.064
-ρ_T ≈ 4.073
-ρ_R ≈ 1.051
+Overlap:
+
+𝑂
+=
+(
+ℎ
+1
+∣
+ℎ
+2
+)
+(
+ℎ
+1
+∣
+ℎ
+1
+)
+(
+ℎ
+2
+∣
+ℎ
+2
+)
+O=
+(h
+1
+	​
+
+∣h
+1
+	​
+
+)(h
+2
+	​
+
+∣h
+2
+	​
+
+)
+	​
+
+(h
+1
+	​
+
+∣h
+2
+	​
+
+)
+	​
+
 
 Mismatch:
 
-M = 1 - Match
-
-M ≈ 2.986 × 10^-3
+𝑀
+=
+1
+−
+𝑂
+M=1−O
 
 Residual norm:
 
-(δh|δh)^(1/2) ≈ 1
+(
+ℎ
+𝑅
+∣
+ℎ
+𝑅
+)
+1
+/
+2
+(h
+R
+	​
 
-Key Result
+∣h
+R
+	​
 
-The waveform remains detectable and highly overlapping, but accumulates a large phase deviation. The dominant effect is loss of faithfulness rather than loss of detectability.
+)
+1/2
+
+What this confirms
+
+Signals are close in inner-product sense
+Residual is still measurable
+How All Figures Connect
+
+From the code behavior:
+
+Time-domain → shows phase drift
+Residual → shows accumulated difference
+Frequency-domain → shows small global deviation
+Strain plot → shows amplitude similarity
+Detector plot → shows detectability
+
+Together they demonstrate:
+
+phase modification
+  
+⟹
+  
+visible residual structure
+phase modification⟹visible residual structure
+Minimal Physical Interpretation (Only What Is Needed)
+
+The only modification introduced in the code affects the phase evolution.
+
+Since phase is integrated over time:
+
+Δ
+Φ
+(
+𝑡
+)
+=
+∫
+(
+difference in evolution
+)
+ 
+𝑑
+𝑡
+ΔΦ(t)=∫(difference in evolution)dt
+
+even a small local change produces a large global shift.
+
+All figures are direct consequences of this accumulation.
 
 How to Run
 
-Install numpy, scipy, matplotlib.
-Run EMRI_LISA_SNR_paper_pipeline.ipynb in Jupyter Notebook sequentially.
+Install:
 
-Benchmark Parameters
+numpy
+scipy
+matplotlib
 
-M = 2 × 10^5 M_sun
-μ = 1.4 M_sun
-a = 0.90
-f ∈ [0.012, 0.021] Hz
+Run:
+
+EMRI_LISA_SNR_paper_pipeline.ipynb
+
+Execute cells sequentially.
 
 Output
 
-The pipeline produces waveform data, spectra, SNR diagnostics, and publication-quality figures suitable for PDF export.
+The code produces:
+
+Time-domain waveform comparison
+Residual evolution
+Frequency spectra
+Characteristic strain plots
+Detector comparison plots
+
+All outputs are directly generated from numerical arrays and require no external data.
 
 Summary
 
-A narrow phase transition in the inspiral flux produces a large coherent phase deformation while preserving high overlap, defining a bias-sensitive regime in gravitational-wave inference.
+This implementation is centered on visual evidence from plots.
+
+The code shows that:
+
+Signals can remain visually similar
+Differences accumulate through phase
+Residual becomes structured and observable
+
+The conclusion is entirely supported by the figures produced by the pipeline.
